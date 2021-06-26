@@ -47,109 +47,10 @@
   )
 )
 
-;---------------------------------------------------------------------------------------------
-; Objetivo: La clase Juego tiene como objetivo almacenar la información que se utilizará para realizar el juego 
-; Salida: Un objeto de la clase Juego
-; Entrada:El constructor de la clase recibe un objeto Personaje, el personaje del usuario, el personaje de la máquina y el turno
-
-(define Juego%
-  (class object%
-    (init a_personajes)
-    (init a_personajeU)
-    (init a_personajeM)
-    (init a_turno)
-    (super-new)
-
-    (define p_personajes a_personajes)
-    (define p_personajeU a_personajeU)
-    (define p_personajeM a_personajeM)
-    (define p_turno a_turno)
-    
-
-    ;;SET - GET a_personajes
-    (define/public (f_setPersonajes p_value)
-      (set! p_personajes p_value)
-    )
-
-    (define/public (f_getPersonajes)
-        p_personajes
-    )
-
-    ;;SET - GET a_personajeU
-    (define/public (f_setPersonajeU p_value)
-      (set! p_personajeU p_value)
-    )
-
-    (define/public (f_getPersonajeU)
-        p_personajeU
-    )
-
-    ;;SET - GET a_personajeM
-    (define/public (f_setPersonajeM p_value)
-      (set! p_personajeM p_value)
-    )
-
-    (define/public (f_getPersonajeM)
-        p_personajeM
-    )
-
-    ;;SET - GET a_turno
-    (define/public (f_setTurno p_value)
-      (set! p_turno p_value)
-    )
-
-    (define/public (f_getTurno)
-        p_turno
-    )
-
-  )
-)
-
-
 ;---------------------------------------------------------------------------------
 ;Funciones juego
 
 (define g_listaPersonajes (list)) ;Lista global con los personajes
-
-;---------------------------------------------------------------------------------------------
-; Objetivo: Inicia el juego al instanciar la clase Juego%
-; Salida: Objeto tipo Juego
-; Entrada: No tiene
-(define (f_iniciarJuego)
-  (define turno (random 2))
-  (define personajes (f_asignarPersonajes))
-  (define personajeU (list-ref personajes 0))
-  (define personajeM (list-ref personajes 1))
-  (define juego (new Juego% [a_personajes g_listaPersonajes] [a_personajeU personajeU] [a_personajeM personajeM] [a_turno turno]))
-  juego  
-)
-
-;---------------------------------------------------------------------------------------------
-; Objetivo: Selecciona dos personajes distintos de manera aleatoria para asignarlos a los jugadores
-; Salida: Lista de personajes
-; Entrada: No tiene
-(define (f_asignarPersonajes)
-  (define len (length g_listaPersonajes))
-  (define pos (random len))
-  (define pos2 (random len))
-  (define per1 (list-ref g_listaPersonajes pos))
-  (define per2 (list-ref g_listaPersonajes pos2))
-  (cond
-    [(equal? pos pos2) (f_asignarPersonajes)]
-    [else (list per1 per2)]
-  )
-  
-)
-
-;---------------------------------------------------------------------------------------------
-; Objetivo: Cambia el turno actual
-; Salida: Turno actual
-; Entrada: Turno anterior
-(define (f_cambiarTurno pTurno)
-  (cond [(equal? pTurno 1) (set! pTurno 0)] ;Cero corresponde a usuario y 1 a jugador
-        [else (set! pTurno 1)])
-  pTurno
-)
 
 ;---------------------------------------------------------------------------------------------
 ; Objetivo: Recibe un hash con atributos del personaje y lo convierte en una lista de lista

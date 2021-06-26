@@ -1,0 +1,52 @@
+{
+  "personajes": [
+     {
+      "nombre": "Roy",
+      "sexo": "Masculino",
+      "etnicidad": "mestizo",
+      "pelo":
+      {
+         "tipo": "ondulado",
+         "color": "castaño",
+         "longitud": "corto"
+      },
+      "imagen": "Imagen 1",
+      "vello facial": "Sin vello",
+      "color de ojos": "café",
+      "accesorio de cabello": "sin accesorio",
+      "color de lentes": "blanco"
+   },
+   {
+    "nombre": "Emma",
+    "sexo": "Femenino",
+    "etnicidad": "caucásico",
+    "pelo":
+    {
+       "tipo": "liso",
+       "color": "naranja",
+       "longitud": "Mediano"
+    },
+    "imagen": "Imagen 2",
+    "vello facial": "Sin vello",
+    "color de ojos": "verde",
+    "accesorio de cabello": "sin accesorio",
+    "color de lentes": "sin lentes"
+ },
+ {
+  "nombre": "Jerry",
+  "sexo": "Masculino",
+  "etnicidad": "afro",
+  "pelo":
+  {
+     "tipo": "liso",
+     "color": "negro",
+     "longitud": "corto"
+  },
+  "imagen": "Imagen 3",
+  "vello facial": "Sin vello",
+  "color de ojos": "negro",
+  "accesorio de cabello": "gorra",
+  "color de lentes": "sin lentes"
+}
+  ]
+}

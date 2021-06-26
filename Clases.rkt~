@@ -157,7 +157,7 @@
   )
 
 
-(f_leerArchivo "Personajes.json")
+(f_leerArchivo "C:/Users/snerd/Documents/TEC/Semestre I 2021/Inteligencia Artificial/PY2/Personajes.json")
 
 (provide Personaje%)
 

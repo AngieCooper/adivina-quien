@@ -1,5 +1,6 @@
 #lang racket
 (require json) ;Librería para abrir los archivos json
+
 ;---------------------------------------------------------------------------------------------
 ; Objetivo: La clase Personaje tiene como objetivo almacenar la información de cada personaje, así como sus respectivos métodos
 ; Salida: Un objeto de la clase Personaje
@@ -111,47 +112,6 @@
 
 (define g_listaPersonajes (list)) ;Lista global con los personajes
 
-;---------------------------------------------------------------------------------------------
-; Objetivo: Inicia el juego al instanciar la clase Juego%
-; Salida: Objeto tipo Juego
-; Entrada: No tiene
-(define (f_iniciarJuego)
-  (define turno (random 2))
-  (define personajes (f_asignarPersonajes))
-  (define personajeU (list-ref personajes 0))
-  (define personajeM (list-ref personajes 1))
-  (define juego (new Juego% [a_personajes g_listaPersonajes] [a_personajeU personajeU] [a_personajeM personajeM] [a_turno turno]))
-  juego  
-)
-
-;---------------------------------------------------------------------------------------------
-; Objetivo: Selecciona dos personajes distintos de manera aleatoria para asignarlos a los jugadores
-; Salida: Lista de personajes
-; Entrada: No tiene
-(define (f_asignarPersonajes)
-  (define len (length g_listaPersonajes))
-  (define pos (random len))
-  (define pos2 (random len))
-  (define per1 (list-ref g_listaPersonajes pos))
-  (define per2 (list-ref g_listaPersonajes pos2))
-  (cond
-    [(equal? pos pos2) (f_asignarPersonajes)]
-    [else (list per1 per2)]
-  )
-  
-)
-
-;---------------------------------------------------------------------------------------------
-; Objetivo: Cambia el turno actual
-; Salida: Turno actual
-; Entrada: Turno anterior
-(define (f_cambiarTurno pTurno)
-  (cond [(equal? pTurno 1) (set! pTurno 0)] ;Cero corresponde a usuario y 1 a jugador
-        [else (set! pTurno 1)])
-  pTurno
-)
-
-;---------------------------------------------------------------------------------------------
 ; Objetivo: Recibe un hash con atributos del personaje y lo convierte en una lista de lista
 ; Salida: Lista de listas
 ; Entrada: Un hash con atributos del personaje
@@ -255,8 +215,74 @@
   v_listaCategorias
   )
 
-
 (f_leerArchivo "Personajes.json")
 
-(provide Personaje%)
+;---------------------------------------------------------------------------------------------
+; Objetivo: Selecciona dos personajes distintos de manera aleatoria para asignarlos a los jugadores
+; Salida: Lista de personajes
+; Entrada: No tiene
+(define (f_asignarPersonajes)
+  (define len (length g_listaPersonajes))
+  (print len)
+  (define pos (random len))
+  (define pos2 (random len))
+  (define per1 (list-ref g_listaPersonajes pos))
+  (define per2 (list-ref g_listaPersonajes pos2))
+  (cond
+    [(equal? pos pos2) (f_asignarPersonajes)]
+    [else (list per1 per2)]
+  )
+  
+)
 
+;---------------------------------------------------------------------------------------------
+; Objetivo: Inicia el juego al instanciar la clase Juego%
+; Salida: Objeto tipo Juego
+; Entrada: No tiene
+(define (f_iniciarJuego)
+  (define turno (random 2))
+  (define personajes (f_asignarPersonajes))
+  (define personajeU (list-ref personajes 0))
+  (define personajeM (list-ref personajes 1))
+  (define juego (new Juego% [a_personajes g_listaPersonajes] [a_personajeU personajeU] [a_personajeM personajeM] [a_turno turno]))
+  juego  
+)
+
+;---------------------------------------------------------------------------------------------
+; Objetivo: Cambia el turno actual
+; Salida: Turno actual
+; Entrada: Turno anterior
+(define (f_cambiarTurno pTurno)
+  (cond [(equal? pTurno 1) (set! pTurno 0)] ;Cero corresponde a usuario y 1 a jugador
+        [else (set! pTurno 1)])
+  pTurno
+)
+
+;---------------------------------------------------------------------------------------------
+; Objetivo: Recibe las categorías de la pregunta del usuario y compara estas con lo que tiene el personaje máquina
+; Salida: 1 sí los datos coincide, null sí no
+; Entrada: Categoría principal, característica y sub categoría si lo tiene (por ejemplo en pelo una sub categoría es longitud)
+;---------------------------------------------------------------------------------------------
+(define (evalua p_categoria p_caracteristica p_subcategoria)
+  (define v_caracts (send (send g_juego f_getPersonajeM) f_getCaracteristicas))
+  (for ([i v_caracts])
+    (cond [((listof string?) i)
+           (cond [(equal? p_categoria (list-ref i 0))
+                  (cond[(equal? p_caracteristica (list-ref i 1)) (print 1)])]
+                  )]
+        [else
+           (cond [(equal? p_categoria (list-ref i 0))
+                  (for ([j (list-ref i 1)])
+                    (cond [(equal? p_subcategoria (list-ref j 0))
+                           (cond [(equal? p_caracteristica (list-ref j 1)) (print 1)]) ])
+                  )])
+        ])
+
+  )
+)
+;(evalua "etnicidad" "afro" "")
+(define g_juego (f_iniciarJuego)) ;Lista global con los personajes
+ 
+(provide Personaje%)
+(provide Juego%)
+;(evaluarPregunta "sexo" "color" "Masculino")     (list-ref (list-ref caracts 1) 0)

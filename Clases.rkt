@@ -550,9 +550,9 @@
 ;---------------------------------------------------------------------------------------------
 ; Objetivo: Crea las reglas que se deben considerar para formular las preguntas de la máquina
 ; Salida: No tiene
-; Entrada: 
+; Entrada: Booleano con la respuesta 1 o 0
 ;---------------------------------------------------------------------------------------------
-(define (crearReglas p_respuesta)
+(define (f_crearReglas p_respuesta)
   (define v_si (string-append "Su " g_categoriaElegida " si es " g_datoElegido))
   (define v_no (string-append "Su " g_categoriaElegida " no es " g_datoElegido))
   (define v_regla "")
@@ -562,12 +562,44 @@
   (f_filtrarPersonajes g_categoriaElegida g_datoElegido p_respuesta)
 )
 
-(define (f_probarJuego)
-  ; printear los personajes que hay
-  ; llamar (f_generarPreguntaM)
-  ; llamar crear reglas con la respuesta
-  ; printear los personajes que quedaron
+;---------------------------------------------------------------------------------------------
+; Objetivo: Retorna una lista con la categoría y el mayor numero de apariciones de la característica
+; Salida: Lista con la categoria y el mayor numero de apariciones en esa categoria
+; Entrada: No tiene
+;---------------------------------------------------------------------------------------------
+(define (f_mayoresApariciones)
+  (define v_todasCategorias (f_getAparicionesCategorias))
+  (define v_mayorApariciones (list))
+  (for ([v_categoria v_todasCategorias])
+    (define v_sublista (list))
+    (define v_masAlto 0)
+    (for ([v_cont (list-ref v_categoria 1)])
+      (cond [(> (list-ref v_cont 1) v_masAlto) (set! v_masAlto (list-ref v_cont 1))])      
+    )
+    (set! v_sublista (append (list (list-ref v_categoria 0)) (list v_masAlto)))
+    (set! v_mayorApariciones (append v_mayorApariciones (list v_sublista)))
+  )
+  v_mayorApariciones
+)
 
+;---------------------------------------------------------------------------------------------
+; Objetivo: Promedia la aparición de las características y lo contrasta con una probabilidad para verificar si es prudente anticipar la respuesta
+; Salida: Booleano 1 sí se puede anticipar, 0 sí no
+; Entrada: No tiene
+;---------------------------------------------------------------------------------------------
+(define (f_anticiparRespuesta)
+  (define v_apariciones (f_mayoresApariciones))
+  (define v_lenPersonajes (length (send g_juego f_getPersonajes)))
+  (define v_porcentajes (list))
+  (for ([v_valor v_apariciones])
+    (set! v_porcentajes (append v_porcentajes (list (/ (list-ref v_valor 1) v_lenPersonajes))) )
+  )
+  (define v_sumaPorcentajes 0)
+  (for ([v_i v_porcentajes])
+    (set! v_sumaPorcentajes (+ v_sumaPorcentajes v_i))
+  )
+  (set! v_sumaPorcentajes (/ (* v_sumaPorcentajes 100) 5))
+  (cond [(> v_sumaPorcentajes 75) (print 1)] [else (print 0)])
 )
 
 (f_leerArchivo "Personajes.json")

@@ -111,6 +111,7 @@
 ;Funciones juego
 
 (define g_listaPersonajes (list)) ;Lista global con los personajes
+(define g_reglas (list)) ;Lista global con las reglas
 
 ; Objetivo: Recibe un hash con atributos del personaje y lo convierte en una lista de lista
 ; Salida: Lista de listas
@@ -280,8 +281,49 @@
 
   )
 )
+
+;---------------------------------------------------------------------------------------------
+; Objetivo: Filtra los personajes de acuerdo con la respuesta a la pregunta realizada por la máquina
+; Salida: No tiene
+; Entrada: La categoría de la caracterítica, la característica y la respuesta en tipo booleano 
+;---------------------------------------------------------------------------------------------
+(define (f_filtrarPersonajes p_categoria p_dato p_respuesta)
+  (define v_personajes (send g_juego f_getPersonajes))
+  (define v_personajesCumplen (list))
+  (define v_personajesNoCumplen (list))
+  (for ([v_perso v_personajes])
+    (define v_caracteristicas (send v_perso f_getCaracteristicas))
+    (for ([v_caract v_caracteristicas])
+      ;(print "llega aqui")
+      (cond [(equal? (list-ref v_caract 0) p_categoria)
+             ;(print "llega aqui")
+             (cond[(equal? p_dato (list-ref v_caract 1)) (set! v_personajesCumplen (append v_personajesCumplen (list v_perso)))]
+                  [else (set! v_personajesNoCumplen (append v_personajesNoCumplen (list v_perso)))])]
+            [(string-contains? p_categoria (list-ref v_caract 0))
+             (for ([i (list-ref v_caract 1)])
+               (cond [(string-contains? p_categoria (list-ref i 0))
+                      (cond[(equal? p_dato (list-ref i 1)) (set! v_personajesCumplen (append v_personajesCumplen (list v_perso)))]
+                           [else (set! v_personajesNoCumplen (append v_personajesNoCumplen (list v_perso)))])])
+             )])
+     )
+  )
+  (cond [(equal? p_respuesta 1) (send g_juego f_setPersonajes v_personajesCumplen)]
+        [else (send g_juego f_setPersonajes v_personajesNoCumplen)])
+)
+
+;---------------------------------------------------------------------------------------------
+; Objetivo:
+; Salida: 
+; Entrada:
+;---------------------------------------------------------------------------------------------
+(define (crearReglas p_respuesta)
+  (cond [(equal? p_respuesta 1) (print "si es")]
+        [else (print "no es")])
+)
+
+;(f_filtrarPersonajes "sexo" "Masculino" "")
 (define g_juego (f_iniciarJuego)) ;Lista global con los personajes
  
 (provide Personaje%)
 (provide Juego%)
-;(evaluarPregunta "sexo" "color" "Masculino")     (list-ref (list-ref caracts 1) 0)
+;(evaluarPregunta "pelo" "rojo" "color")     

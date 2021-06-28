@@ -502,18 +502,18 @@
 ; Salida: 1 sí los datos coincide, null sí no
 ; Entrada: Categoría principal, característica y sub categoría si lo tiene (por ejemplo en pelo una sub categoría es longitud)
 ;---------------------------------------------------------------------------------------------
-(define (evalua p_categoria p_caracteristica p_subcategoria)
+(define (f_evaluaPregunta p_categoria p_caracteristica p_subcategoria)
   (define v_caracts (send (send g_juego f_getPersonajeM) f_getCaracteristicas))
   (for ([i v_caracts])
     (cond [((listof string?) i)
-           (cond [(equal? p_categoria (list-ref i 0))
-                  (cond[(equal? p_caracteristica (list-ref i 1)) (print 1)])]
+           (cond [(equal? (string-downcase p_categoria) (string-downcase (list-ref i 0)))
+                  (cond[(equal? (string-downcase p_caracteristica) (string-downcase (list-ref i 1))) (print 1)])]
                   )]
         [else
            (cond [(equal? p_categoria (list-ref i 0))
                   (for ([j (list-ref i 1)])
-                    (cond [(equal? p_subcategoria (list-ref j 0))
-                           (cond [(equal? p_caracteristica (list-ref j 1)) (print 1)]) ])
+                    (cond [(equal? (string-downcase p_subcategoria) (string-downcase (list-ref j 0)))
+                           (cond [(equal? (string-downcase p_caracteristica) (string-downcase (list-ref j 1))) (print 1)]) ])
                   )])
         ])
 
@@ -528,6 +528,7 @@
 (f_generarPreguntaM)
 ;(f_obtenerApariciones "sexo")
 ;(evalua "etnicidad" "afro" "")
+
 (define g_juego (f_iniciarJuego)) ;Lista global con los personajes
  
 (provide Personaje%)

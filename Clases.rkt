@@ -532,9 +532,7 @@
   (for ([v_perso v_personajes])
     (define v_caracteristicas (send v_perso f_getCaracteristicas))
     (for ([v_caract v_caracteristicas])
-      ;(print "llega aqui")
       (cond [(equal? (list-ref v_caract 0) p_categoria)
-             ;(print "llega aqui")
              (cond[(equal? p_dato (list-ref v_caract 1)) (set! v_personajesCumplen (append v_personajesCumplen (list v_perso)))]
                   [else (set! v_personajesNoCumplen (append v_personajesNoCumplen (list v_perso)))])]
             [(string-contains? p_categoria (list-ref v_caract 0))
@@ -550,27 +548,35 @@
 )
 
 ;---------------------------------------------------------------------------------------------
-; Objetivo:
-; Salida: 
-; Entrada:
+; Objetivo: Crea las reglas que se deben considerar para formular las preguntas de la máquina
+; Salida: No tiene
+; Entrada: 
 ;---------------------------------------------------------------------------------------------
 (define (crearReglas p_respuesta)
-  (cond [(equal? p_respuesta 1) (print "si es")]
-        [else (print "no es")])
+  (define v_si (string-append "Su " g_categoriaElegida " si es " g_datoElegido))
+  (define v_no (string-append "Su " g_categoriaElegida " no es " g_datoElegido))
+  (define v_regla "")
+  (cond [(equal? p_respuesta 1) (set! v_regla v_si) ]
+        [else (set! v_regla v_no)])
+  (set! g_reglas (append g_reglas (list v_regla)))
+  (f_filtrarPersonajes g_categoriaElegida g_datoElegido p_respuesta)
 )
 
-;(f_filtrarPersonajes "sexo" "Masculino" "")
+(define (f_probarJuego)
+  ; printear los personajes que hay
+  ; llamar (f_generarPreguntaM)
+  ; llamar crear reglas con la respuesta
+  ; printear los personajes que quedaron
+
+)
 
 (f_leerArchivo "Personajes.json")
 (set! g_caractConfirmadas (append g_caractConfirmadas (list "sexo")))
 (set! g_caractConfirmadas (append g_caractConfirmadas (list "etnicidad")))
 (f_generarPreguntaM)
 (f_generarPreguntaM)
-;(f_obtenerApariciones "sexo")
-;(evalua "etnicidad" "afro" "")
 
 (define g_juego (f_iniciarJuego)) ;Lista global con los personajes
  
 (provide Personaje%)
-(provide Juego%)
-;(evaluarPregunta "pelo" "rojo" "color")     
+(provide Juego%)   

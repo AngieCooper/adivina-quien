@@ -189,6 +189,7 @@
       [(equal? (car objeto) 'personajes) (set! g_listaPersonajes (append g_listaPersonajes (f_guardarPersonajes (cdr objeto))))]
     )
   )
+  (set! g_posiblesPersonajes g_listaPersonajes)
   (f_setCategorias)
 )
 
@@ -340,7 +341,39 @@
 ; Salida: Retorna la categoria con menos apariciones
 ; Entrada: Lista de categorias
 
-(define (f_getMenosAparicionesExtra p_lista)
+(define (f_getCatMasApariciones p_lista)
+  (define v_actual null)
+  (define v_nuevaLista (list ))
+  (for ([v_i p_lista])
+    (define v_temporal null)
+    (for ([v_j (cadr v_i)])
+      (cond
+        [(null? v_temporal) (set! v_temporal v_j)]
+        [else (
+               cond
+                [(> (cadr v_j) (cadr v_temporal)) (set! v_temporal v_j)]
+         )]
+        )
+      )
+    (set! v_nuevaLista (append v_nuevaLista (list (list (car v_i) v_temporal))))
+    )
+  (for ([v_i v_nuevaLista])
+    (cond
+     [(null? v_actual) (set! v_actual v_i)]
+     [else (cond
+             [(> (cadadr v_i) (cadadr v_actual)) (set! v_actual v_i)]
+            )]
+     )
+    )
+  v_actual
+  )
+
+;---------------------------------------------------------------------------------------------
+; Objetivo: Obtiene la categoria con menos apariciones
+; Salida: Retorna la categoria con menos apariciones
+; Entrada: Lista de categorias
+
+(define (f_getMasAparicionesExtra p_lista)
   (define v_actual null)
   (define v_temporal null)
   (for ([v_i p_lista])
@@ -348,7 +381,7 @@
         [(null? v_temporal) (set! v_temporal v_i)]
         [else (
                cond
-                [(< (cadr v_i) (cadr v_temporal)) (set! v_temporal v_i)]
+                [(> (cadr v_i) (cadr v_temporal)) (set! v_temporal v_i)]
          )]
         )
     )
@@ -366,18 +399,21 @@
   (define v_info null)
   (cond
     [(false? (existe "sexo" g_caractConfirmadas))
-      (set! v_info (f_getMenosAparicionesExtra (f_obtenerApariciones "sexo")))
+      (set! v_info (f_getMasAparicionesExtra (f_obtenerApariciones "sexo")))
       (set! v_categoria "sexo")
       (set! v_dato (car v_info))
       (set! g_caractConfirmadas (append g_caractConfirmadas (list "sexo")))
       ]
-    [(false? (existe "etnicidad" g_caractConfirmadas))
-      (set! v_info (f_getMenosAparicionesExtra (f_obtenerApariciones "etnicidad")))
-      (set! v_categoria "etnicidad")
-      (set! v_dato (car v_info))
-      (set! g_caractConfirmadas (append g_caractConfirmadas (list "etnicidad")))
+    [(> (length g_posiblesPersonajes) (quotient (length g_listaPersonajes) 2))
+    
+      (print "entra al 1")
+      (set! v_info (f_getCatMasApariciones (f_getAparicionesCategorias)))
+      (set! v_categoria (car v_info))
+      (set! v_dato (caadr v_info))
+      (set! g_caractConfirmadas (append g_caractConfirmadas (list v_categoria)))
+
       ]
-   [else
+   [(<= (length g_posiblesPersonajes) (quotient (length g_listaPersonajes) 2))
       (set! v_info (f_getCatMenosApariciones (f_getAparicionesCategorias)))
       (set! v_categoria (car v_info))
       (set! v_dato (caadr v_info))
@@ -433,7 +469,7 @@
 (define (f_obtenerApariciones p_categoria)
   (define apariciones (list ))
   (define v_nuevo null)
-  (for([v_personaje g_listaPersonajes])
+  (for([v_personaje g_posiblesPersonajes])
     (define v_caracteristicas (send v_personaje f_getCaracteristicas))
     (for([v_i v_caracteristicas] #:break (false?(null? v_nuevo)))
       (define v_dato1 (car v_i))
@@ -543,8 +579,8 @@
              )])
      )
   )
-  (cond [(equal? p_respuesta 1) (send g_juego f_setPersonajes v_personajesCumplen)]
-        [else (send g_juego f_setPersonajes v_personajesNoCumplen)])
+  (cond [(equal? p_respuesta 1) (send g_juego f_setPersonajes v_personajesCumplen) (set! g_posiblesPersonajes v_personajesCumplen)]
+        [else (send g_juego f_setPersonajes v_personajesNoCumplen) (set! g_posiblesPersonajes v_personajesNoCumplen)])
 )
 
 ;---------------------------------------------------------------------------------------------
@@ -556,24 +592,21 @@
   (define v_si (string-append "Su " g_categoriaElegida " si es " g_datoElegido))
   (define v_no (string-append "Su " g_categoriaElegida " no es " g_datoElegido))
   (define v_regla "")
-  (cond [(equal? p_respuesta 1) (set! v_regla v_si) ]
+  (cond [(equal? p_respuesta 1) (set! v_regla v_si) (set! g_caractConfirmadas (append g_caractConfirmadas g_categoriaElegida)) ]
         [else (set! v_regla v_no)])
   (set! g_reglas (append g_reglas (list v_regla)))
   (f_filtrarPersonajes g_categoriaElegida g_datoElegido p_respuesta)
 )
 
-(define (f_probarJuego)
+;(define (f_probarJuego)
   ; printear los personajes que hay
   ; llamar (f_generarPreguntaM)
   ; llamar crear reglas con la respuesta
   ; printear los personajes que quedaron
 
-)
+;)
 
 (f_leerArchivo "Personajes.json")
-(set! g_caractConfirmadas (append g_caractConfirmadas (list "sexo")))
-(set! g_caractConfirmadas (append g_caractConfirmadas (list "etnicidad")))
-(f_generarPreguntaM)
 (f_generarPreguntaM)
 
 (define g_juego (f_iniciarJuego)) ;Lista global con los personajes

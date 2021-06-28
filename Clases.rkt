@@ -1,5 +1,6 @@
 #lang racket
 (require json) ;Librería para abrir los archivos json
+(require racket/string) ;Funciones especiales de string
 
 ;---------------------------------------------------------------------------------------------
 ; Objetivo: La clase Personaje tiene como objetivo almacenar la información de cada personaje, así como sus respectivos métodos
@@ -27,7 +28,7 @@
         p_nombre
     )
 
-    ;;SET - GET a_nacionalidad
+    ;;SET - GET a_caracteristicas
     (define/public (f_setCaracteristicas p_value)
       (set! p_caracteristicas p_value)
     )
@@ -110,7 +111,15 @@
 ;---------------------------------------------------------------------------------
 ;Funciones juego
 
+;---------------------------------------------------------------------------------
+;Variables globales
 (define g_listaPersonajes (list)) ;Lista global con los personajes
+(define g_caractConfirmadas (list )) ;Lista global con las caracteristicas confirmadas del personaje a adivinar
+(define g_posiblesPersonajes (list )) ;Lista global con las caracteristicas confirmadas del personaje a adivinar
+(define g_categorias (list )) ;Lista global con las categorias de las características
+(define g_categoriaElegida null) ;Categoria que elige la maquina para hacer la pregunta
+(define g_datoElegido null) ;Dato que elige la maquina para hacer la pregunta
+
 
 ; Objetivo: Recibe un hash con atributos del personaje y lo convierte en una lista de lista
 ; Salida: Lista de listas
@@ -180,8 +189,7 @@
       [(equal? (car objeto) 'personajes) (set! g_listaPersonajes (append g_listaPersonajes (f_guardarPersonajes (cdr objeto))))]
     )
   )
-  ;(print (car(car (send (car g_listaPersonajes) f_getCaracteristicas))))
-  (f_getCategorias)
+  (f_setCategorias)
 )
 
 ;---------------------------------------------------------------------------------------------
@@ -202,7 +210,7 @@
 ; Salida: Retorna una lista con todas la categorías de las características de los personajes
 ; Entrada: No tiene
 
-(define (f_getCategorias)
+(define (f_setCategorias)
   (define v_caracteristicas (send (car g_listaPersonajes) f_getCaracteristicas))
   (define v_listaCategorias (list ))
   (for([v_caracteristica v_caracteristicas])
@@ -211,11 +219,243 @@
       [else (set! v_listaCategorias (append v_listaCategorias (list (car v_caracteristica))))]
       )
     )
-  (print v_listaCategorias)
-  v_listaCategorias
+  (set! g_categorias v_listaCategorias)
   )
 
-(f_leerArchivo "Personajes.json")
+;---------------------------------------------------------------------------------------------
+; Objetivo: Obtiene todas la categorías de las características de los personajes
+; Salida: Retorna una lista con todas la categorías de las características de los personajes
+; Entrada: No tiene
+
+(define (f_getCategorias)
+  g_categorias
+  )
+
+;---------------------------------------------------------------------------------------------
+; Objetivo: Verifica si un elemento existe en una lista
+; Salida: True si existe, False en caso contrario
+; Entrada: El elemento que se desea verificar y la lista
+(define (existe p_elemento p_lista)
+  (define res #f)
+  (for ([i p_lista] #:break(equal? res #t))
+    (cond [(equal? i p_elemento) (set! res #t)])
+    )
+  res
+  )
+
+;---------------------------------------------------------------------------------------------
+; Objetivo: Obtener la característica de un personaje
+; Salida: caracteristica solicitada
+; Entrada: El personaje y la caracteristica solicitada
+
+(define (f_getSubCatPersonaje p_categoria p_personaje)
+  (define v_caracteristicas (send p_personaje f_getCaracteristicas))
+  (define v_res null)
+  (for([v_i v_caracteristicas] #:break (false?(null? v_res)))
+    (define v_c1 (car v_i))
+    (define v_c2  (cadr v_i))
+    (cond
+      [(equal? v_c1 p_categoria) (set! v_res v_c2)]
+      [(string-contains? p_categoria v_c1)
+        (for ([v_j v_c2] #:break (false?(null? v_res)))
+          (define v_c3 (car v_j))
+          (define v_c4  (cadr v_j))
+          (cond
+          [(string-contains? p_categoria v_c3) (set! v_res v_c4)]
+          )
+          )
+       ]
+      )
+    )
+  v_res
+  )
+
+;---------------------------------------------------------------------------------------------
+; Objetivo: Obtiene todas la categorías de las características de los personajes
+; Salida: Retorna una lista con todas la categorías de las características de los personajes
+; Entrada: No tiene
+
+(define (f_getSubCategorias p_categoria)
+  (define v_subCategorias (list ))
+  (define v_sub null)
+  (for([v_personaje g_listaPersonajes])
+    (set! v_sub (f_getSubCatPersonaje p_categoria v_personaje))
+    (cond
+      [(false?(existe v_sub v_subCategorias))(set! v_subCategorias (append v_subCategorias (list v_sub)))]
+      )
+    )
+  v_subCategorias
+  )
+
+
+;---------------------------------------------------------------------------------------------
+; Objetivo: Obtiene todas la categorías de las características de los personajes
+; Salida: Retorna una lista con todas la categorías de las características de los personajes
+; Entrada: No tiene
+
+(define (f_getAparicionesCategorias)
+  (define v_lista (list ))
+  (for ([v_cat g_categorias])
+    (cond
+      [(false?(existe v_cat g_caractConfirmadas)) (set! v_lista (append v_lista (list (list v_cat (f_obtenerApariciones v_cat)))))]
+      )
+    )
+  v_lista
+  )
+
+;---------------------------------------------------------------------------------------------
+; Objetivo: Obtiene la categoria con menos apariciones
+; Salida: Retorna la categoria con menos apariciones
+; Entrada: Lista de categorias
+
+(define (f_getCatMenosApariciones p_lista)
+  (define v_actual null)
+  (define v_nuevaLista (list ))
+  (for ([v_i p_lista])
+    (define v_temporal null)
+    (for ([v_j (cadr v_i)])
+      (cond
+        [(null? v_temporal) (set! v_temporal v_j)]
+        [else (
+               cond
+                [(< (cadr v_j) (cadr v_temporal)) (set! v_temporal v_j)]
+         )]
+        )
+      )
+    (set! v_nuevaLista (append v_nuevaLista (list (list (car v_i) v_temporal))))
+    )
+  (for ([v_i v_nuevaLista])
+    (cond
+     [(null? v_actual) (set! v_actual v_i)]
+     [else (cond
+             [(< (cadadr v_i) (cadadr v_actual)) (set! v_actual v_i)]
+            )]
+     )
+    )
+  v_actual
+  )
+
+;---------------------------------------------------------------------------------------------
+; Objetivo: Obtiene la categoria con menos apariciones
+; Salida: Retorna la categoria con menos apariciones
+; Entrada: Lista de categorias
+
+(define (f_getMenosAparicionesExtra p_lista)
+  (define v_actual null)
+  (define v_temporal null)
+  (for ([v_i p_lista])
+      (cond
+        [(null? v_temporal) (set! v_temporal v_i)]
+        [else (
+               cond
+                [(< (cadr v_i) (cadr v_temporal)) (set! v_temporal v_i)]
+         )]
+        )
+    )
+  v_temporal
+  )
+
+;---------------------------------------------------------------------------------------------
+; Objetivo: Generar la pregunta que va a hacer computadora
+; Salida: Retorna la pregunta formulada
+; Entrada: No tiene
+
+(define (f_generarPreguntaM)
+  (define v_categoria null)
+  (define v_dato null)
+  (define v_info null)
+  (cond
+    [(false? (existe "sexo" g_caractConfirmadas))
+      (set! v_info (f_getMenosAparicionesExtra (f_obtenerApariciones "sexo")))
+      (set! v_categoria "sexo")
+      (set! v_dato (car v_info))
+      (set! g_caractConfirmadas (append g_caractConfirmadas (list "sexo")))
+      ]
+    [(false? (existe "etnicidad" g_caractConfirmadas))
+      (set! v_info (f_getMenosAparicionesExtra (f_obtenerApariciones "etnicidad")))
+      (set! v_categoria "etnicidad")
+      (set! v_dato (car v_info))
+      (set! g_caractConfirmadas (append g_caractConfirmadas (list "etnicidad")))
+      ]
+   [else
+      (set! v_info (f_getCatMenosApariciones (f_getAparicionesCategorias)))
+      (set! v_categoria (car v_info))
+      (set! v_dato (caadr v_info))
+      (set! g_caractConfirmadas (append g_caractConfirmadas (list v_categoria)))
+      ]
+   )
+  (set! g_categoriaElegida v_categoria)
+  (set! g_datoElegido v_dato)
+  (define pregunta (f_formularPregunta v_categoria v_dato))
+  pregunta
+  )
+
+;---------------------------------------------------------------------------------------------
+; Objetivo: Formular la pregunta con base en la categoría y el dato recibido
+; Salida: Retorna la pregunta formulada
+; Entrada: Recibe la categoría de la pregunta y el dato
+
+(define (f_formularPregunta p_categoria p_dato)
+  (define v_pregunta (string-append "¿Su " p_categoria " es " p_dato "?"))
+  v_pregunta
+  )
+
+
+;---------------------------------------------------------------------------------------------
+; Objetivo: Actualizar la lista de apariciones 
+; Salida: Retorna la lista de apariciones actualizada
+; Entrada: Recibe la lista de apariciones y la nueva aparición de insertar
+(define (f_insertarAparicion p_lista p_aparicion)
+  (define v_aparece #f)
+  (define v_nuevaLista (list ))
+  (for ([p_i p_lista])
+    (define v_dato (car p_i))
+    (define v_aparicion (cadr p_i))
+    (cond
+      [(equal? v_dato p_aparicion) 
+        (set! v_aparicion (+ v_aparicion 1))
+        (set! v_aparece #t)
+      ]
+     )
+    (set! v_nuevaLista (append v_nuevaLista (list (list v_dato v_aparicion))))
+   )
+  (cond
+    [(false? v_aparece) (set! v_nuevaLista (append v_nuevaLista (list (list p_aparicion 1))))]
+    )
+  v_nuevaLista
+  )
+
+;---------------------------------------------------------------------------------------------
+; Objetivo: Obtiene la cantidad de apariciones de los datos de una categoría
+; Salida: Retorna una lista con los datos de la categoría y su cantidad de apariciones
+; Entrada: Recibe la categoría
+
+(define (f_obtenerApariciones p_categoria)
+  (define apariciones (list ))
+  (define v_nuevo null)
+  (for([v_personaje g_listaPersonajes])
+    (define v_caracteristicas (send v_personaje f_getCaracteristicas))
+    (for([v_i v_caracteristicas] #:break (false?(null? v_nuevo)))
+      (define v_dato1 (car v_i))
+      (define v_dato2 (cadr v_i))
+      (cond
+      [(equal? v_dato1 p_categoria) (set! v_nuevo v_dato2)]
+      [(string-contains? p_categoria v_dato1)
+        (for ([v_j v_dato2] #:break (false?(null? v_nuevo)))
+          (define v_c3 (car v_j))
+          (define v_c4  (cadr v_j))
+          (cond
+          [(string-contains? p_categoria v_c3) (set! v_nuevo v_c4)]
+          )
+          )
+       ]
+      )
+     )
+    (set! apariciones (f_insertarAparicion apariciones v_nuevo))
+    (set! v_nuevo null)
+   )
+  apariciones
+  )
 
 ;---------------------------------------------------------------------------------------------
 ; Objetivo: Selecciona dos personajes distintos de manera aleatoria para asignarlos a los jugadores
@@ -223,7 +463,6 @@
 ; Entrada: No tiene
 (define (f_asignarPersonajes)
   (define len (length g_listaPersonajes))
-  (print len)
   (define pos (random len))
   (define pos2 (random len))
   (define per1 (list-ref g_listaPersonajes pos))
@@ -231,8 +470,7 @@
   (cond
     [(equal? pos pos2) (f_asignarPersonajes)]
     [else (list per1 per2)]
-  )
-  
+  )  
 )
 
 ;---------------------------------------------------------------------------------------------
@@ -247,6 +485,7 @@
   (define juego (new Juego% [a_personajes g_listaPersonajes] [a_personajeU personajeU] [a_personajeM personajeM] [a_turno turno]))
   juego  
 )
+
 
 ;---------------------------------------------------------------------------------------------
 ; Objetivo: Cambia el turno actual
@@ -280,6 +519,14 @@
 
   )
 )
+
+
+(f_leerArchivo "Personajes.json")
+(set! g_caractConfirmadas (append g_caractConfirmadas (list "sexo")))
+(set! g_caractConfirmadas (append g_caractConfirmadas (list "etnicidad")))
+(f_generarPreguntaM)
+(f_generarPreguntaM)
+;(f_obtenerApariciones "sexo")
 ;(evalua "etnicidad" "afro" "")
 (define g_juego (f_iniciarJuego)) ;Lista global con los personajes
  

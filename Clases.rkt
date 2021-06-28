@@ -502,21 +502,18 @@
 ; Salida: 1 sí los datos coincide, null sí no
 ; Entrada: Categoría principal, característica y sub categoría si lo tiene (por ejemplo en pelo una sub categoría es longitud)
 ;---------------------------------------------------------------------------------------------
-(define (f_evaluaPregunta p_categoria p_caracteristica p_subcategoria)
-  (define v_caracts (send (send g_juego f_getPersonajeM) f_getCaracteristicas))
-  (for ([i v_caracts])
-    (cond [((listof string?) i)
-           (cond [(equal? (string-downcase p_categoria) (string-downcase (list-ref i 0)))
-                  (cond[(equal? (string-downcase p_caracteristica) (string-downcase (list-ref i 1))) (print 1)])]
-                  )]
-        [else
-           (cond [(equal? p_categoria (list-ref i 0))
-                  (for ([j (list-ref i 1)])
-                    (cond [(equal? (string-downcase p_subcategoria) (string-downcase (list-ref j 0)))
-                           (cond [(equal? (string-downcase p_caracteristica) (string-downcase (list-ref j 1))) (print 1)]) ])
-                  )])
-        ])
-
+(define (f_evaluaPregunta p_categoria p_caracteristica)
+  (define v_caract (send (send g_juego f_getPersonajeM) f_getCaracteristicas))
+  (print v_caract)
+  (for ([i v_caract])
+    (cond [(equal? (string-downcase (list-ref i 0)) (string-downcase p_categoria))
+             (cond[(equal?(string-downcase p_caracteristica) (string-downcase (list-ref i 1))) (print 1)])]
+             [(string-contains? p_categoria (list-ref i 0))
+              (for ([i (list-ref i 1)])
+                (cond [(string-contains? (string-downcase p_categoria) (string-downcase (list-ref i 0)))
+                       (cond[(equal? (string-downcase p_caracteristica) (string-downcase (list-ref i 1))) (print 1)]
+                            )])
+                )])
   )
 )
 

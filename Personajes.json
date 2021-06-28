@@ -47,6 +47,118 @@
   "color de ojos": "negro",
   "accesorio de cabello": "gorra",
   "color de lentes": "sin lentes"
-}
+},
+{
+  "nombre": "Lisa",
+  "sexo": "Femenino",
+  "etnicidad": "caucásico",
+  "pelo":
+  {
+     "tipo": "colocho",
+     "color": "rubio",
+     "longitud": "Mediano"
+  },
+  "imagen": "Imagen 4",
+  "vello facial": "Sin vello",
+  "color de ojos": "celeste",
+  "accesorio de cabello": "lazos",
+  "color de lentes": "sin lentes"
+},
+{
+  "nombre": "Jacob",
+  "sexo": "Masculino",
+  "etnicidad": "afro",
+  "pelo":
+  {
+     "tipo": "colocho",
+     "color": "café",
+     "longitud": "corto"
+  },
+  "imagen": "Imagen 5",
+  "vello facial": "Sin vello",
+  "color de ojos": "negro",
+  "accesorio de cabello": "sin accesorio",
+  "color de lentes": "sin lentes"
+},
+{
+  "nombre": "Ethan",
+  "sexo": "Masculino",
+  "etnicidad": "caucásico",
+  "pelo":
+  {
+     "tipo": "liso",
+     "color": "rubio",
+     "longitud": "corto"
+  },
+  "imagen": "Imagen 6",
+  "vello facial": "Sin vello",
+  "color de ojos": "celeste",
+  "accesorio de cabello": "gorra",
+  "color de lentes": "sin lentes"
+},
+{
+  "nombre": "Madison",
+  "sexo": "Femenino",
+  "etnicidad": "caucásico",
+  "pelo":
+  {
+     "tipo": "liso",
+     "color": "café",
+     "longitud": "Mediano"
+  },
+  "imagen": "Imagen 7",
+  "vello facial": "Sin vello",
+  "color de ojos": "verde",
+  "accesorio de cabello": "sin accesorio",
+  "color de lentes": "sin lentes"
+},
+{
+  "nombre": "Anthony",
+  "sexo": "Masculino",
+  "etnicidad": "caucásico",
+  "pelo":
+  {
+     "tipo": "liso",
+     "color": "rubio",
+     "longitud": "corto"
+  },
+  "imagen": "Imagen 8",
+  "vello facial": "Sin vello",
+  "color de ojos": "café",
+  "accesorio de cabello": "sin accesorio",
+  "color de lentes": "sin lentes"
+},
+{
+  "nombre": "Sophia",
+  "sexo": "Femenino",
+  "etnicidad": "caucásico",
+  "pelo":
+  {
+     "tipo": "liso",
+     "color": "café",
+     "longitud": "largo"
+  },
+  "imagen": "Imagen 9",
+  "vello facial": "Sin vello",
+  "color de ojos": "celeste",
+  "accesorio de cabello": "cola",
+  "color de lentes": "sin lentes"
+},
+{
+    "nombre": "Anna",
+    "sexo": "Femenino",
+    "etnicidad": "mestizo",
+    "pelo":
+    {
+       "tipo": "liso",
+       "color": "negro",
+       "longitud": "Mediano"
+    },
+    "imagen": "Imagen 13",
+    "vello facial": "Sin vello",
+    "color de ojos": "verde",
+    "accesorio de cabello": "sin accesorio",
+    "color de lentes": "sin lentes"
+ }
   ]
 }

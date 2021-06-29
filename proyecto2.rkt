@@ -2,6 +2,16 @@
 
 
 (require racket/gui)
+(require "Clases.rkt")
+
+(define caf null)
+(define maquina 0)
+(define usuario 1)
+
+
+
+;(define personas (f_leerArchivo "Personajes.json"))
+;(display (send (car personas) f_getCaracteristicas))
 
 ;Ruta del json
 ;json path object
@@ -15,30 +25,22 @@
   (define/public (set-ruta new-ruta) (set! ruta new-ruta))
   ))
 
+(define negro (make-object color% 0 0 0))
 ;;///////////////////////////////////////////////////////////////////////
 ;;///////////////////////////////////////////////////////////////////////
 ;;///////////////////////////////////////////////////////////////////////
 (define miPrincipal (new frame%
                          [label "Adivina quien"]
+                         [width 1200]
+                         [height 720]
+                         [x 0]
+                         [y 0]
+                         [style '(fullscreen-button
+                                  no-resize-border
+                                  toolbar-button
+                                  metal)]
                          ))
-
-
 ;;principal panel
-#|
-
-    --------------------------------------------
-    |                                          |
-    |                                          |
-    |                                          |
-    |                                          |
-    |                                          |
-    |                                          |
-    |                                          |
-    |                                          |
-    --------------------------------------------
-
-|#
-
 (define panelHorizontal1 (new horizontal-panel%
                               [parent miPrincipal]
                               [style '(border)]
@@ -50,6 +52,27 @@
 
 
 ;-----------------------------Preguntas Panel-----------------------------------------
+
+(define funcionSN (lambda(num)
+                    (cond ((= num 0) (new message%
+                                          [parent chatPnl]
+                                          [label "Maquina: No"]))
+                          (else (new message%
+                                     [parent chatPnl]
+                                     [label "Maquina: Si"])))))
+
+(define categorias '("Cat1" "Cat2" "Cat3"))
+
+(define subCat '(("c1" "c2" "c3") ("a1" "a2" "a3") ("b1" "b2" "b3")))
+
+(define getSubCat (lambda(cat)
+                    (let ([cats categorias]
+                          [subc subCat])
+                    (letrec ([fun (lambda(cat categorias subCat)                                    
+                                    (cond ((string=? cat (car categorias)) (car subCat))
+                                          (else (fun cat (cdr categorias) (cdr subCat)))))])
+                      (fun cat cats subc)))))
+
 (define pregVerticalPnl (new vertical-panel%
                               [parent panelHorizontal1]
                               [style '(border)]
@@ -63,19 +86,66 @@
                            [parent pregVerticalPnl]
                            [label "Formulacion de preguntas"]
                            [font normal-control-font]
-                           [auto-resize #t]
-                           [min-width 500]
-                           [min-height 500]))
+                           [auto-resize #t]))
 
-(define listCat (new combo-field%
-                     [parent pregVerticalPnl]
-                     [label "Categorias"]
-                     [choices '("Categoria 1" "Categoria 2" "Categoria 2")]))
+(define lista-Cat
+  (new (class combo-field%      
+         (super-new)     
+         (inherit get-menu append)
+         (define/public (update-choices choice-list)
+           ; remove all the old items
+           (map
+             (lambda (i)
+               (send i delete))
+             (send (get-menu) get-items))
+           ; set up the menu with all new items
+           (map
+            (lambda (choice-label)
+              (append choice-label))
+            choice-list)
+           (void))
+         )
+       [callback (lambda(button event)
+                   (let ([subs (getSubCat (send button get-value))])                     
+                     (send combo-field update-choices subs)))]
+       [parent pregVerticalPnl]
+       [label "Categorias"]
+       [choices '()]
+       [stretchable-width #t]
+       [stretchable-height #f]
+       ))
 
-(define listCatOpc (new combo-field%
-                     [parent pregVerticalPnl]
-                     [label "Opciones"]
-                     [choices '("Opcion 1" "Opcion 2" "Opcion 3")]))
+
+(define combo-field
+  (new (class combo-field%      
+         (super-new)     
+         (inherit get-menu append)
+         (define/public (update-choices choice-list)
+           ; remove all the old items
+           (map
+             (lambda (i)
+               (send i delete))
+             (send (get-menu) get-items))
+           ; set up the menu with all new items
+           (map
+            (lambda (choice-label)
+              (append choice-label))
+            choice-list)
+           (void))
+         )
+       
+       [parent pregVerticalPnl]
+       [label "SubCategorias"]
+       [callback (lambda (button event)
+                   (let* ([subc (send button get-value)]
+                          [cat (send lista-Cat get-value)]
+                          [pregunta (f_formularPregunta cat subc)])
+                      (send pregForm set-value pregunta)))]
+       [choices '()]
+       [stretchable-width #t]
+       [stretchable-height #f]
+       ))
+
 
 (define pregForm (new text-field%
                       [parent pregVerticalPnl]
@@ -89,7 +159,19 @@
                               ))
 (define button-preguntar (new button%
                          [parent buttonACPnl]
-                         [label "Preguntar"]))
+                         [label "Preguntar"]
+                         [callback (lambda(button event)               
+                                     (let([pregunta (send pregForm get-value)]
+                                          [cat (send lista-Cat get-value)]
+                                          [subc (send combo-field get-value)])
+                                       (cond((not(string=? "" pregunta))
+                                             (new message% [parent chatPnl]
+                                                  [label (string-append "Yo: " pregunta)])
+                                              (funcionSN (f_evaluaPregunta cat subc))
+                                              (send g_juego f_setTurno (f_cambiarTurno (send g_juego f_getTurno)))
+                                              (jugar))
+                                            ((println "Pregunta vacia"))))
+                                     (send pregForm set-value ""))]))
 
 (define button-Limpiar (new button%
                          [parent buttonACPnl]
@@ -130,11 +212,33 @@
                               ))
 (define yes-button (new button%
                          [parent buttonYNPnl]
-                         [label "Si"]))
+                         [label "Si"]
+                         [callback (lambda(button event)
+                                     (new message%
+                                          [parent chatPnl]
+                                          [label "Yo: si"])
+                                      (let ([res (f_evaluarRespuesta 1)])
+                                        (cond ((not(string=? res ""))
+                                               ((new message%
+                                                     [parent chatPnl]
+                                                     [label res])))))
+                                      (send g_juego f_setTurno (f_cambiarTurno (send g_juego f_getTurno)))
+                                      (jugar))]))
 
-(define No-button (new button%
+(define no-button (new button%
                          [parent buttonYNPnl]
-                         [label "No"]))
+                         [label "No" ]
+                         [callback (lambda(button event)
+                                     (new message%
+                                          [parent chatPnl]
+                                          [label "Yo: No"])
+                                      (let ([res (f_evaluarRespuesta 0)])
+                                        (cond ((not(string=? res ""))
+                                               ((new message%
+                                                     [parent chatPnl]
+                                                     [label res])))))
+                                      (send g_juego f_setTurno (f_cambiarTurno (send g_juego f_getTurno)))
+                                      (jugar))]))
 
 ;--------------------------------Descision Panel -----------------------------
 (define descVerticalPnl (new vertical-panel%
@@ -163,23 +267,109 @@
                               [spacing 2]
                               [border 5]))
 
-;------------------------------Character Panel --------------------------------
-(define charVerticalPnl (new vertical-panel%
-                              [parent miPrincipal]
-                              [style '(border)]
-                              [alignment '(left top)]
-                              [horiz-margin 5]
-                              [vert-margin 5]
-                              [spacing 5]
-                              [border 25]))
+;------------------------------Character Frame --------------------------------
+;------------------------------------------------------------------------
+;------------------------------------------------------------------------
+(define framePersonajes (new frame%
+                   [label "Personajes"]
+                   ;[width 300]
+                   [height 500]
+                   ))
 
-(define characters-lbl (new message%
-                           [parent charVerticalPnl]
-                           [label "Personajes"]
-                           [font normal-control-font]
-                           [auto-resize #t]
-                           [min-width 500]
-                           [min-height 500]))
+;Panel para contener las imagenes de personajes
+(define frame (new vertical-panel%
+                   [parent framePersonajes]
+                   [style '(auto-vscroll)]))
+
+;Funcion para obtener una imagen dado su nombre en string
+; string -> bitmap%
+(define obtener-imagen (lambda(nombre)
+                         (make-object bitmap% nombre)))
+;Funcion para tener la imagen de descartado
+;() -> bitmap%
+(define descartado (obtener-imagen "descartado.png"))
+
+
+(define grilla '(0))
+
+; Funcion que cumple la tarea de descartar un personaje y tachar su nombre
+(define (descartar-f button-char button-elegir)
+  (lambda(nombre)
+    (send button-char set-label descartado)
+    (println (string-append "Se ha descartado " nombre))
+    (send button-elegir enable #f)))
+
+
+
+
+;Funcion que sirve para mostrar la info del personaje
+(define crear-msg (lambda(personaje) (let* ([dialogo (instantiate dialog% ("Informacion"))]
+                                            [info_p (f_getInfoPersonaje personaje)]
+                                            [info (new text-field%
+                                                       [parent dialogo]
+                                                       [label #f]
+                                                       [style '(multiple)]
+                                                       [min-width 200]
+                                                       [min-height 200]
+                                                       [enabled #f])])
+                                       (send info set-value info_p)
+                                       (send dialogo show #t) )))
+
+;Descarta al personaje y lo vuelve inelegible
+(define (dis-f entrada button-img btn-choice)
+  (println entrada)
+  (send button-img set-label descartado)
+  (send button-img enable #f)
+  (send btn-choice enable #f))
+
+; crea la caja del personaje con los botones de elegir y descarte
+(define crear-caja (lambda(padre imagen personaje)
+                     (let* ([caja (new vertical-panel% [parent padre] [style '(border)] [alignment '(left center)])]
+                            [nombre (new message% [parent caja] [label personaje])]
+                            [btnImg (new button% [parent caja]
+                                        [label imagen]
+                                        [callback (lambda(button event) ( crear-msg personaje))])]
+                            [cajaBtn (new horizontal-panel% [parent caja])]
+                            [chooseBtn (new button%
+                                            [parent cajaBtn]
+                                            [label "Escoger"]
+                                            [callback (lambda (button event)
+                                                        (new message%
+                                                             [parent chatPnl]
+                                                             [label (string-append "Yo: Tu personaje es " personaje "?")]))])]
+                            [dropBtn (new button% [parent cajaBtn]
+                                         [label "Descartar"]
+                                         [callback (lambda(button event)
+                                                     (dis-f "Hola" btnImg chooseBtn)
+                                                     (send button enable #f))])])
+                       caja)))
+
+;crea un nuevo contenedor donde se almacenaran los personajes en filas
+;() -> vertical-panel%
+(define container (new vertical-panel% [parent frame]))
+
+;crea las filas y agrega a los personajes
+(define agregar-grilla (lambda(contador personajes grilla padre)
+                         (cond ((null? personajes) '())
+                               ((= (modulo contador 5) 0)
+                                (let* ([nueva-fila (new horizontal-panel% [parent padre])]
+                                       [persona (car personajes)]
+                                       [nombre_p (send persona f_getNombre)]
+                                       [img (send persona f_getImagen)]
+                                       [caja (crear-caja nueva-fila (obtener-imagen img ) nombre_p)])
+                                  (agregar-grilla (+ contador 1) (cdr personajes) nueva-fila padre)))
+                               (else
+                                (let* (      
+                                       [persona (car personajes)]
+                                       [nombre_p (send persona f_getNombre)]
+                                       [img (send persona f_getImagen)]
+                                       [caja (crear-caja grilla (obtener-imagen img) nombre_p)])
+                                (agregar-grilla (+ contador 1) (cdr personajes) grilla padre))))))
+
+
+;
+
+;zona de trabajo
 
 ;; ///////////////////////////////////////////////////////////////////
 ;;////////////////////////////////////////////////////////////////////
@@ -218,8 +408,16 @@
                                      (let ([ruta (send jsonObj get-ruta)])
                                        (if (path? ruta)
                                            (begin
-                                             (writeln "\n Exito al abrir el archivo")
-                                             (send miPrincipal show #t))
+                                             (set! caf (f_leerArchivo (path->string ruta)))
+                                             (set! subCat (f_getSubCategorias))
+                                             (set! categorias (f_getCategorias))
+                                             (send lista-Cat update-choices (f_getCategorias))
+                                             (agregar-grilla 0 caf null frame )
+                                             (send miPrincipal show #t)
+                                             (send frameInit show #f)
+                                             (display (send (send g_juego f_getPersonajeU) f_getNombre))
+                                             (display (send (send g_juego f_getPersonajeM) f_getNombre))
+                                             (jugar))
                                            (writeln "indefinido"))))]))
 
 (define button-search (new button%
@@ -239,4 +437,32 @@
 ;;///////////////////////////////////////////////////////////////////////
 ;;///////////////////////////////////////////////////////////////////////
 ; Show the dialog
-(send miPrincipal show #t)
+
+(new button%
+     [parent miPrincipal]
+     [label "Muestra personajes"]
+     [callback (lambda (button event)
+                 (send framePersonajes show #t))])
+
+(send frameInit show #t)
+(send miPrincipal show #f)
+(send framePersonajes show #f)
+
+(define jugar (lambda()
+                (cond ((= (send g_juego f_getTurno) maquina)
+                       (send lista-Cat enable #f)
+                       (send combo-field enable #f)
+                       (send button-Limpiar enable #f )
+                       (send button-preguntar enable #f )
+                       (send yes-button enable #t)
+                       (send no-button enable #t)
+                       (new message% [parent chatPnl]
+                            [label (string-append "Maquina: " (f_generarPreguntaM))]))
+                      
+                      (else
+                       (send yes-button enable #f)
+                        (send no-button enable #f)
+                        (send lista-Cat enable #t)
+                        (send combo-field enable #t)
+                        (send button-Limpiar enable #t)
+                        (send button-preguntar enable #t)))))

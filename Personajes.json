@@ -10,7 +10,7 @@
          "color": "café",
          "longitud": "mediano"
       },
-      "imagen": "Imagen 1",
+      "imagen": "./images/roy.png",
       "vello facial": "sin vello",
       "color de ojos": "café oscuro",
       "accesorio de cabello": "sin accesorio",
@@ -26,7 +26,7 @@
        "color": "naranja",
        "longitud": "mediano"
     },
-    "imagen": "Imagen 2",
+    "imagen": "./images/emma.png",
     "vello facial": "sin vello",
     "color de ojos": "verde",
     "accesorio de cabello": "sin accesorio",
@@ -42,7 +42,7 @@
      "color": "negro",
      "longitud": "corto"
   },
-  "imagen": "Imagen 3",
+  "imagen": "./images/jerry.png",
   "vello facial": "sin vello",
   "color de ojos": "café oscuro",
   "accesorio de cabello": "gorra",
@@ -58,7 +58,7 @@
      "color": "rubio",
      "longitud": "mediano"
   },
-  "imagen": "Imagen 4",
+  "imagen": "./images/lisa.png",
   "vello facial": "sin vello",
   "color de ojos": "celeste",
   "accesorio de cabello": "lazos",
@@ -74,7 +74,7 @@
      "color": "café",
      "longitud": "mediano"
   },
-  "imagen": "Imagen 5",
+  "imagen": "./images/jacob.png",
   "vello facial": "sin vello",
   "color de ojos": "café oscuro",
   "accesorio de cabello": "sin accesorio",
@@ -90,7 +90,7 @@
      "color": "rubio",
      "longitud": "corto"
   },
-  "imagen": "Imagen 6",
+  "imagen": "./images/ethan.png",
   "vello facial": "sin vello",
   "color de ojos": "celeste",
   "accesorio de cabello": "gorra",
@@ -106,7 +106,7 @@
      "color": "café",
      "longitud": "mediano"
   },
-  "imagen": "Imagen 7",
+  "imagen": "./images/madison.png",
   "vello facial": "sin vello",
   "color de ojos": "verde",
   "accesorio de cabello": "sin accesorio",
@@ -122,7 +122,7 @@
      "color": "rubio",
      "longitud": "corto"
   },
-  "imagen": "Imagen 8",
+  "imagen": "./images/anthony.png",
   "vello facial": "sin vello",
   "color de ojos": "café",
   "accesorio de cabello": "sin accesorio",
@@ -138,7 +138,7 @@
      "color": "café",
      "longitud": "largo"
   },
-  "imagen": "Imagen 9",
+  "imagen": "./images/sophia.png",
   "vello facial": "sin vello",
   "color de ojos": "celeste",
   "accesorio de cabello": "cola",
@@ -154,7 +154,7 @@
       "color": "negro",
       "longitud": "sin pelo"
    },
-   "imagen": "Imagen 10",
+   "imagen": "./images/david.png",
    "vello facial": "barba y bigote",
    "color de ojos": "verde",
    "accesorio de cabello": "sin accesorio",
@@ -170,7 +170,7 @@
       "color": "naranja",
       "longitud": "largo"
    },
-   "imagen": "Imagen 11",
+   "imagen": "./images/abigail.png",
    "vello facial": "sin vello",
    "color de ojos": "café oscuro",
    "accesorio de cabello": "cola",
@@ -186,7 +186,7 @@
       "color": "cafe",
       "longitud": "corto"
    },
-   "imagen": "Imagen 12",
+   "imagen": "./images/alexander.png",
    "vello facial": "barba y bigote",
    "color de ojos": "celeste",
    "accesorio de cabello": "gorra",
@@ -202,7 +202,7 @@
        "color": "negro",
        "longitud": "mediano"
     },
-    "imagen": "Imagen 13",
+    "imagen": "./images/anna.png",
     "vello facial": "sin vello",
     "color de ojos": "verde",
     "accesorio de cabello": "sin accesorio",
@@ -218,7 +218,7 @@
       "color": "naranja",
       "longitud": "corto"
    },
-   "imagen": "Imagen 14",
+   "imagen": "./images/benjamin.png",
    "vello facial": "sin vello",
    "color de ojos": "verde",
    "accesorio de cabello": "sin accesorio",
@@ -234,7 +234,7 @@
       "color": "rubio",
       "longitud": "mediano"
    },
-   "imagen": "Imagen 15",
+   "imagen": "./images/maria.png",
    "vello facial": "sin vello",
    "color de ojos": "celeste",
    "accesorio de cabello": "diadema",
@@ -250,7 +250,7 @@
       "color": "negro",
       "longitud": "mediano"
    },
-   "imagen": "Imagen 16",
+   "imagen": "./images/scott.png",
    "vello facial": "bigote",
    "color de ojos": "café oscuro",
    "accesorio de cabello": "sin accesorio",
@@ -266,7 +266,7 @@
       "color": "naranja",
       "longitud": "sin pelo"
    },
-   "imagen": "Imagen 17",
+   "imagen": "./images/campbell.png",
    "vello facial": "sin vello",
    "color de ojos": "café",
    "accesorio de cabello": "sin accesorio",
@@ -282,7 +282,7 @@
       "color": "negro",
       "longitud": "mediano"
    },
-   "imagen": "Imagen 18",
+   "imagen": "./images/tiffany.png",
    "vello facial": "sin vello",
    "color de ojos": "café oscuro",
    "accesorio de cabello": "lazos",
@@ -298,7 +298,7 @@
       "color": "rubio",
       "longitud": "mediano"
    },
-   "imagen": "Imagen 19",
+   "imagen": "./images/martin.png",
    "vello facial": "barba y bigote",
    "color de ojos": "celeste",
    "accesorio de cabello": "sin accesorio",
@@ -314,7 +314,7 @@
       "color": "café",
       "longitud": "mediano"
    },
-   "imagen": "Imagen 20",
+   "imagen": "./images/rachel.png",
    "vello facial": "sin vello",
    "color de ojos": "verde",
    "accesorio de cabello": "sombrero",
@@ -330,7 +330,7 @@
       "color": "negro",
       "longitud": "mediano"
    },
-   "imagen": "Imagen 21",
+   "imagen": "./images/richard.png",
    "vello facial": "barba",
    "color de ojos": "verde",
    "accesorio de cabello": "sin accesorio",
@@ -346,7 +346,7 @@
       "color": "naranja",
       "longitud": "mediano"
    },
-   "imagen": "Imagen 22",
+   "imagen": "./images/laura.png",
    "vello facial": "sin vello",
    "color de ojos": "verde",
    "accesorio de cabello": "lazos",
@@ -362,7 +362,7 @@
       "color": "negro",
       "longitud": "sin pelo"
    },
-   "imagen": "Imagen 23",
+   "imagen": "./images/charles.png",
    "vello facial": "bigote",
    "color de ojos": "celeste",
    "accesorio de cabello": "sombrero",
@@ -378,7 +378,7 @@
       "color": "negro",
       "longitud": "largo"
    },
-   "imagen": "Imagen 24",
+   "imagen": "./images/linda.png",
    "vello facial": "sin vello",
    "color de ojos": "celeste",
    "accesorio de cabello": "cola",

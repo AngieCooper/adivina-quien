@@ -9,10 +9,6 @@
 (define usuario 1)
 
 
-
-;(define personas (f_leerArchivo "Personajes.json"))
-;(display (send (car personas) f_getCaracteristicas))
-
 ;Ruta del json
 ;json path object
 
@@ -40,6 +36,10 @@
                                   toolbar-button
                                   metal)]
                          ))
+
+(define turnolbl (new message%
+                      [parent miPrincipal]
+                      [label "Es el turno de: "]))
 ;;principal panel
 (define panelHorizontal1 (new horizontal-panel%
                               [parent miPrincipal]
@@ -56,10 +56,10 @@
 (define funcionSN (lambda(num)
                     (cond ((= num 0) (new message%
                                           [parent chatPnl]
-                                          [label "Maquina: No"]))
+                                          [label "Jugador Automático: No"]))
                           (else (new message%
                                      [parent chatPnl]
-                                     [label "Maquina: Si"])))))
+                                     [label "Jugador Automático: Si"])))))
 
 (define categorias '("Cat1" "Cat2" "Cat3"))
 
@@ -157,6 +157,11 @@
                               [parent pregVerticalPnl]
                               [alignment '(center center)]      
                               ))
+
+(define funcion-turno (lambda()
+                        (let ([turno (send g_juego f_getTurno)])
+                        (cond ((= turno maquina) "Jugador Automatico")
+                              (else "Usuario")))))
 (define button-preguntar (new button%
                          [parent buttonACPnl]
                          [label "Preguntar"]
@@ -169,6 +174,7 @@
                                                   [label (string-append "Yo: " pregunta)])
                                               (funcionSN (f_evaluaPregunta cat subc))
                                               (send g_juego f_setTurno (f_cambiarTurno (send g_juego f_getTurno)))
+                                              (send turnolbl set-label (string-append "Turno de " (funcion-turno)))
                                               (jugar))
                                             ((println "Pregunta vacia"))))
                                      (send pregForm set-value ""))]))
@@ -210,6 +216,13 @@
                               [alignment '(center center)]
                               [style '(border)]
                               ))
+
+(define ganar-funcion (lambda(jugador)
+                        (let*([dialg (instantiate dialog% ("Ganador"))]
+                              [msg (new message% [parent dialg]
+                                        [label (string-append "Ha ganado: " jugador)])])
+                          (send framePersonajes show #f)
+                          (send dialg show #t))))
 (define yes-button (new button%
                          [parent buttonYNPnl]
                          [label "Si"]
@@ -218,12 +231,18 @@
                                           [parent chatPnl]
                                           [label "Yo: si"])
                                       (let ([res (f_evaluarRespuesta 1)])
+                                        (send labelCh set-label (f_getReglas))
                                         (cond ((not(string=? res ""))
                                                ((new message%
                                                      [parent chatPnl]
-                                                     [label res])))))
-                                      (send g_juego f_setTurno (f_cambiarTurno (send g_juego f_getTurno)))
-                                      (jugar))]))
+                                                     [label res])))
+                                              ((not (null? g_personajeElegido))
+                                               (ganar-funcion "Jugador Automático"))
+                                              (else
+                                               (send g_juego f_setTurno (f_cambiarTurno (send g_juego f_getTurno)))
+                                                (send turnolbl set-label (string-append "Turno de: " (funcion-turno)))
+                                                (jugar))))
+                                      )]))
 
 (define no-button (new button%
                          [parent buttonYNPnl]
@@ -233,12 +252,16 @@
                                           [parent chatPnl]
                                           [label "Yo: No"])
                                       (let ([res (f_evaluarRespuesta 0)])
+                                        (send labelCh set-label (f_getReglas))
                                         (cond ((not(string=? res ""))
                                                ((new message%
                                                      [parent chatPnl]
-                                                     [label res])))))
-                                      (send g_juego f_setTurno (f_cambiarTurno (send g_juego f_getTurno)))
-                                      (jugar))]))
+                                                     [label res]))
+                                               (cond ((not (null? g_personajeElegido))
+                                               (ganar-funcion "Jugador"))))
+                                              (else (send g_juego f_setTurno (f_cambiarTurno (send g_juego f_getTurno)))
+                                                     (send turnolbl set-label (string-append "Turno de " (funcion-turno)))
+                                                     (jugar)))))]))
 
 ;--------------------------------Descision Panel -----------------------------
 (define descVerticalPnl (new vertical-panel%
@@ -261,11 +284,13 @@
 (define choicesMchPnl (new vertical-panel%
                               [parent descVerticalPnl]
                               [style '(border auto-vscroll )]
-                              [alignment '(center center)]
+                              [alignment '(left top)]
                               [vert-margin 5]
                               [horiz-margin 5]
                               [spacing 2]
                               [border 5]))
+
+(define labelCh (new message% [parent choicesMchPnl] [label ""]))
 
 ;------------------------------Character Frame --------------------------------
 ;------------------------------------------------------------------------
@@ -317,8 +342,6 @@
 
 ;Descarta al personaje y lo vuelve inelegible
 (define (dis-f entrada button-img btn-choice)
-  (println entrada)
-  (send button-img set-label descartado)
   (send button-img enable #f)
   (send btn-choice enable #f))
 
@@ -336,7 +359,11 @@
                                             [callback (lambda (button event)
                                                         (new message%
                                                              [parent chatPnl]
-                                                             [label (string-append "Yo: Tu personaje es " personaje "?")]))])]
+                                                             [label (string-append "Yo: Tu personaje es " personaje "?")])
+                                                         (let*([resp (f_isPersonaje personaje)])
+                                                                           (cond ((= resp 1) (ganar-funcion "Jugador"))
+                                                                                 (else (ganar-funcion "Jugador automático"))))
+                                                         )])]
                             [dropBtn (new button% [parent cajaBtn]
                                          [label "Descartar"]
                                          [callback (lambda(button event)
@@ -374,6 +401,8 @@
 ;; ///////////////////////////////////////////////////////////////////
 ;;////////////////////////////////////////////////////////////////////
 
+
+
 (define jsonObj (new jsonClass%))
 (define frameInit (new frame% [label "Inicio"]))
 
@@ -401,6 +430,25 @@
 (define panel-button (new horizontal-panel%
                           [parent panelInit]))
 
+(define funcion-info (lambda(persona)
+                       (let* ([dialog (instantiate dialog% ("Info"))]
+                              [mess (new message%
+                                         [parent dialog]
+                                         [label (string-append "Tu personaje es: " persona)])]
+                              [Img (obtener-imagen (send (send g_juego f_getPersonajeU) f_getImagen))]
+                              [btnImg (new button%
+                                           [parent dialog]
+                                           [label Img])])
+                         (send dialog show #t))))
+
+(define funcion-gane (lambda(persona)
+                       (let* ([dialog (instantiate dialog% ("Ganar"))]
+                              [mess (new message%
+                                         [parent dialog]
+                                         [label (string-append "Tu has " persona)])]
+                              )
+                         #f)))
+
 (define button-open (new button%
                          [parent panel-button]
                          [label "Abrir"]
@@ -415,8 +463,9 @@
                                              (agregar-grilla 0 caf null frame )
                                              (send miPrincipal show #t)
                                              (send frameInit show #f)
-                                             (display (send (send g_juego f_getPersonajeU) f_getNombre))
-                                             (display (send (send g_juego f_getPersonajeM) f_getNombre))
+                                             ;(display (send (send g_juego f_getPersonajeM) f_getNombre))
+                                             (funcion-info (send (send g_juego f_getPersonajeU) f_getNombre))
+                                             (send turnolbl set-label (string-append "Turno de " (funcion-turno)))
                                              (jugar))
                                            (writeln "indefinido"))))]))
 
@@ -457,7 +506,7 @@
                        (send yes-button enable #t)
                        (send no-button enable #t)
                        (new message% [parent chatPnl]
-                            [label (string-append "Maquina: " (f_generarPreguntaM))]))
+                            [label (string-append "Jugador Automático: " (f_generarPreguntaM))]))
                       
                       (else
                        (send yes-button enable #f)

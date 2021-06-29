@@ -120,6 +120,7 @@
 (define g_categorias (list )) ;Lista global con las categorias de las características
 (define g_categoriaElegida null) ;Categoria que elige la maquina para hacer la pregunta
 (define g_datoElegido null) ;Dato que elige la maquina para hacer la pregunta
+(define g_personajeElegido null) ;Se guarda el personaje que adivina la maquina
 
 ; Objetivo: Recibe un hash con atributos del personaje y lo convierte en una lista de lista
 ; Salida: Lista de listas
@@ -305,6 +306,19 @@
   )
 
 ;---------------------------------------------------------------------------------------------
+; Objetivo: Obtiene todas la categorías de las características de los personajes
+; Salida: Retorna una lista con todas la categorías de las características de los personajes
+; Entrada: No tiene
+
+(define (f_getAparicionesTodasCategorias)
+  (define v_lista (list ))
+  (for ([v_cat g_categorias])
+    (set! v_lista (append v_lista (list (list v_cat (f_obtenerApariciones v_cat)))))
+    )
+  v_lista
+  )
+
+;---------------------------------------------------------------------------------------------
 ; Objetivo: Obtiene la categoria con menos apariciones
 ; Salida: Retorna la categoria con menos apariciones
 ; Entrada: Lista de categorias
@@ -404,25 +418,24 @@
       (set! v_dato (car v_info))
       (set! g_caractConfirmadas (append g_caractConfirmadas (list "sexo")))
       ]
-    [(> (length g_posiblesPersonajes) (quotient (length g_listaPersonajes) 2))
-    
-      (print "entra al 1")
+    [(> (length g_posiblesPersonajes) (quotient (length g_listaPersonajes) 3))
+     (print "preguntas generales")
       (set! v_info (f_getCatMasApariciones (f_getAparicionesCategorias)))
       (set! v_categoria (car v_info))
       (set! v_dato (caadr v_info))
-      (set! g_caractConfirmadas (append g_caractConfirmadas (list v_categoria)))
 
       ]
-   [(<= (length g_posiblesPersonajes) (quotient (length g_listaPersonajes) 2))
+   [(<= (length g_posiblesPersonajes) (quotient (length g_listaPersonajes) 3))
+    (print "preguntas específicas")
       (set! v_info (f_getCatMenosApariciones (f_getAparicionesCategorias)))
       (set! v_categoria (car v_info))
       (set! v_dato (caadr v_info))
-      (set! g_caractConfirmadas (append g_caractConfirmadas (list v_categoria)))
       ]
    )
   (set! g_categoriaElegida v_categoria)
   (set! g_datoElegido v_dato)
   (define pregunta (f_formularPregunta v_categoria v_dato))
+  (print pregunta)
   pregunta
   )
 
@@ -540,17 +553,18 @@
 ;---------------------------------------------------------------------------------------------
 (define (f_evaluaPregunta p_categoria p_caracteristica)
   (define v_caract (send (send g_juego f_getPersonajeM) f_getCaracteristicas))
-  (print v_caract)
+  (define v_res 0)
   (for ([i v_caract])
     (cond [(equal? (string-downcase (list-ref i 0)) (string-downcase p_categoria))
-             (cond[(equal?(string-downcase p_caracteristica) (string-downcase (list-ref i 1))) (print 1)])]
+             (cond[(equal?(string-downcase p_caracteristica) (string-downcase (list-ref i 1))) (set! v_res 1)])]
              [(string-contains? p_categoria (list-ref i 0))
               (for ([i (list-ref i 1)])
                 (cond [(string-contains? (string-downcase p_categoria) (string-downcase (list-ref i 0)))
-                       (cond[(equal? (string-downcase p_caracteristica) (string-downcase (list-ref i 1))) (print 1)]
+                       (cond[(equal? (string-downcase p_caracteristica) (string-downcase (list-ref i 1))) (set! v_res 1)]
                             )])
                 )])
   )
+  v_res
 )
 
 ;---------------------------------------------------------------------------------------------
@@ -576,8 +590,8 @@
              )])
      )
   )
-  (cond [(equal? p_respuesta 1) (send g_juego f_setPersonajes v_personajesCumplen) (set! g_posiblesPersonajes v_personajesCumplen)]
-        [else (send g_juego f_setPersonajes v_personajesNoCumplen) (set! g_posiblesPersonajes v_personajesNoCumplen)])
+  (cond [(equal? p_respuesta 1) (send g_juego f_setPersonajes v_personajesCumplen) (set! g_posiblesPersonajes v_personajesCumplen) (print v_personajesCumplen)]
+        [else (send g_juego f_setPersonajes v_personajesNoCumplen) (set! g_posiblesPersonajes v_personajesNoCumplen) (print v_personajesNoCumplen)])
 )
 
 ;---------------------------------------------------------------------------------------------
@@ -589,26 +603,50 @@
   (define v_si (string-append "Su " g_categoriaElegida " si es " g_datoElegido))
   (define v_no (string-append "Su " g_categoriaElegida " no es " g_datoElegido))
   (define v_regla "")
-  (cond [(equal? p_respuesta 1) (set! v_regla v_si) (set! g_caractConfirmadas (append g_caractConfirmadas g_categoriaElegida)) ]
+  (cond [(equal? p_respuesta 1) (set! v_regla v_si) (cond [(false?(equal? g_categoriaElegida "sexo")) (set! g_caractConfirmadas (append g_caractConfirmadas (list g_categoriaElegida)))]) ]
         [else (set! v_regla v_no)])
   (set! g_reglas (append g_reglas (list v_regla)))
-  (f_filtrarPersonajes g_categoriaElegida g_datoElegido p_respuesta)
 )
 
-;(define (f_probarJuego)
-  ; printear los personajes que hay
-  ; llamar (f_generarPreguntaM)
-  ; llamar crear reglas con la respuesta
-  ; printear los personajes que quedaron
+(define (f_evaluarRespuesta p_respuesta)
+  (define v_respuesta "")
+  (f_crearReglas p_respuesta)
+  (f_filtrarPersonajes g_categoriaElegida g_datoElegido p_respuesta)
+  (cond
+    [(equal? (length g_posiblesPersonajes) 1) (set! v_respuesta (f_personajeAdivinado (car g_posiblesPersonajes)))]
+    [else
+     (cond
+       [(equal? (f_anticiparRespuesta) 1) (set! v_respuesta (f_elegirPersonaje))]
+       [(equal? (f_anticiparRespuesta) -1) (set! v_respuesta "No existe el personaje") ]
+       )]
+    )
+  (print v_respuesta)
+  v_respuesta
+  )
 
-;)
+(define (f_personajeAdivinado p_personaje)
+  (set! g_personajeElegido p_personaje)
+  (define v_nombre (send p_personaje f_getNombre))
+  (define v_resultado (string-append "Su personaje es " v_nombre))
+  v_resultado
+  )
+
+
+(define (f_elegirPersonaje)
+  (define v_pos (random (length g_posiblesPersonajes)))
+  (define v_personaje (list-ref g_posiblesPersonajes v_pos))
+  (define v_respuesta (f_personajeAdivinado v_personaje))
+  v_respuesta  
+  ) 
+
+
 ;---------------------------------------------------------------------------------------------
 ; Objetivo: Retorna una lista con la categoría y el mayor numero de apariciones de la característica
 ; Salida: Lista con la categoria y el mayor numero de apariciones en esa categoria
 ; Entrada: No tiene
 ;---------------------------------------------------------------------------------------------
 (define (f_mayoresApariciones)
-  (define v_todasCategorias (f_getAparicionesCategorias))
+  (define v_todasCategorias (f_getAparicionesTodasCategorias))
   (define v_mayorApariciones (list))
   (for ([v_categoria v_todasCategorias])
     (define v_sublista (list))
@@ -631,21 +669,44 @@
   (define v_apariciones (f_mayoresApariciones))
   (define v_lenPersonajes (length (send g_juego f_getPersonajes)))
   (define v_porcentajes (list))
-  (for ([v_valor v_apariciones])
-    (set! v_porcentajes (append v_porcentajes (list (/ (list-ref v_valor 1) v_lenPersonajes))) )
+  (define v_res null)
+  (cond [(> v_lenPersonajes 0)
+        (for ([v_valor v_apariciones])
+          (set! v_porcentajes (append v_porcentajes (list (/ (list-ref v_valor 1) v_lenPersonajes))) )
+          )
+        (define v_sumaPorcentajes 0)
+        (for ([v_i v_porcentajes])
+          (set! v_sumaPorcentajes (+ v_sumaPorcentajes v_i))
+          )
+        (set! v_sumaPorcentajes (/ (* v_sumaPorcentajes 100) (length v_apariciones)))
+        (cond [(> v_sumaPorcentajes 75) (set! v_res 1)] [else (set! v_res 0)])
+  
+        (print "aqui va el %")
+        (print v_sumaPorcentajes)]
+        [else (set! v_res -1)]
   )
-  (define v_sumaPorcentajes 0)
-  (for ([v_i v_porcentajes])
-    (set! v_sumaPorcentajes (+ v_sumaPorcentajes v_i))
-  )
-  (set! v_sumaPorcentajes (/ (* v_sumaPorcentajes 100) 5))
-  (cond [(> v_sumaPorcentajes 75) (print 1)] [else (print 0)])
+  v_res
 )
 
-(f_leerArchivo "Personajes.json")
-(f_generarPreguntaM)
+(define g_juego null)
 
-(define g_juego (f_iniciarJuego)) ;Lista global con los personajes
- 
+(define (prueba)
+(f_leerArchivo "Personajes.json")
+(set! g_juego (f_iniciarJuego))
+(f_generarPreguntaM)
+(f_evaluarRespuesta 0)
+(f_generarPreguntaM)
+(f_evaluarRespuesta 1)
+(f_generarPreguntaM)
+(f_evaluarRespuesta 0)
+(f_generarPreguntaM)
+(f_evaluarRespuesta 0)
+)
+
+;(prueba)
+;(f_leerArchivo "Personajes.json")
+;(f_generarPreguntaM)
+ ;Lista global con los personajes
+;(f_anticiparRespuesta)
 (provide Personaje%)
 (provide Juego%)   

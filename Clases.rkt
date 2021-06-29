@@ -708,5 +708,7 @@
 ;(f_generarPreguntaM)
  ;Lista global con los personajes
 ;(f_anticiparRespuesta)
-(provide Personaje%)
-(provide Juego%)   
+;(provide Personaje%)
+;(provide Juego%)
+
+(provide (all-defined-out))

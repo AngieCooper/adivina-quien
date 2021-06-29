@@ -183,7 +183,7 @@
    "pelo":
    {
       "tipo": "liso",
-      "color": "cafe",
+      "color": "café",
       "longitud": "corto"
    },
    "imagen": "./images/alexander.png",
@@ -211,7 +211,7 @@
  {
    "nombre": "Benjamín",
    "sexo": "masculino",
-   "etnicidad": "Caucásico",
+   "etnicidad": "caucásico",
    "pelo":
    {
       "tipo": "liso",
